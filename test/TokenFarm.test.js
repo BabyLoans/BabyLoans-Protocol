@@ -1,6 +1,6 @@
-const DaiToken = artifacts.require("DaiToken");
-const DappToken = artifacts.require("DappToken");
-const TokenFarm = artifacts.require("TokenFarm");
+const DaiToken = artifacts.require("DaiToken")
+const DappToken = artifacts.require("DappToken")
+const TokenFarm = artifacts.require("TokenFarm")
 
 require('chai')
 	.use(require('chai-as-promised'))
@@ -16,6 +16,7 @@ contract('TokenFarm', ([owner, investor]) => {
 	let daiToken, dappToken, tokenFarm
 
 	before(async () => {
+
 		//contract load 
 		daiToken = await DaiToken.new()
 		dappToken = await DappToken.new()
@@ -30,7 +31,7 @@ contract('TokenFarm', ([owner, investor]) => {
 	})
 
 
-
+	//test Mock Dai deployement 
 	describe('Mock Dai deployment', async ()=> {
 		it('has a name', async ()=>{
 			const name = await daiToken.name()
@@ -38,18 +39,34 @@ contract('TokenFarm', ([owner, investor]) => {
 		})
 	})
 
+	//test DappToken deployement 
 	describe('Dapp Token deployment', async ()=> {
 		it('has a name', async ()=>{
 			const name = await dappToken.name()
-			assert.equal(name, "Dapp Test Token")
+			assert.equal(name, "BabyLoans")
+		})
+
+		it('contract has tokens', async()=>{
+			let balance = await dappToken.balanceOf(tokenFarm.address)
+			assert.equal(balance.toString(), tokens('100000'))
 		})
 	})
 
+	//Test Farming Token
 	describe('Farming Token', async () => {
 		it('rewards investors for staking mDai tokens', async ()=> {
+			let result 
+
 			//Check investor balance before staking 
-			result = await daiToken.balanceOf(invesor)
-			assert.equal(result.toString(), tokens('100'))
+			result = await daiToken.balanceOf(investor)
+			assert.equal(result.toString(), tokens('10'), 'investor mock dai wallet balance correct before staking')
+			
+			// Stake Mock Dai Tokens
+			await daiToken.approve(tokenFarm.address, tokens('100'), {from: investor})
+			await tokenFarm.stakeTokens(token('100'), {from: investor})
+
+			result = await daiToken.balanceOf(investor)
+			assert.equal(result.toString(), tokens('0'), 'investor Mock DAI wallet balance correct after staking')
 		})
 	})
 })
