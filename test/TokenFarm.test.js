@@ -25,7 +25,7 @@ contract('TokenFarm', ([owner, investor]) => {
 		await dappToken.transfer(tokenFarm.address, tokens('1000000'))
 
 		//Send tokens to the investor
-		await dappToken.transfer(investor, tokens('100'), {from: owner})
+		await dappToken.transfer(investor, tokens('100'), { from:owner })
 
 	})
 
@@ -35,6 +35,21 @@ contract('TokenFarm', ([owner, investor]) => {
 		it('has a name', async ()=>{
 			const name = await daiToken.name()
 			assert.equal(name, "Mock DAI Token")
+		})
+	})
+
+	describe('Dapp Token deployment', async ()=> {
+		it('has a name', async ()=>{
+			const name = await dappToken.name()
+			assert.equal(name, "Dapp Test Token")
+		})
+	})
+
+	describe('Farming Token', async () => {
+		it('rewards investors for staking mDai tokens', async ()=> {
+			//Check investor balance before staking 
+			result = await daiToken.balanceOf(invesor)
+			assert.equal(result.toString(), tokens('100'))
 		})
 	})
 })
