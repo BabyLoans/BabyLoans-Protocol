@@ -1,5 +1,6 @@
 pragma solidity >=0.7.0 <0.9.0;
 
+import "./IBEP20.sol";
 import "./BTokenInterfaces.sol";
 
 abstract contract BToken is BTokenInterface {
@@ -74,5 +75,51 @@ abstract contract BToken is BTokenInterface {
         returns (uint256)
     {
         return transferAllowances[owner][spender];
+    }
+
+    /**
+     * @notice Mint tokens for the minter
+     */
+    function mint(IBEP20 tokenContract, uint256 amount)
+        public
+        override
+        returns (bool)
+    {
+        require(amount > 0, "amount must be greater than 0");
+        bool success = tokenContract.transferFrom(
+            msg.sender,
+            address(this),
+            amount
+        );
+
+        if (success) {
+            return false;
+        }
+
+        accountTokens[msg.sender] += amount;
+        return true;
+    }
+
+    /**
+     * @notice Burn tokens for the minter
+     */
+    function burn(IBEP20 tokenContract, uint256 amount)
+        public
+        override
+        returns (bool)
+    {
+        require(amount > 0, "amount must be greater than 0");
+        bool success = tokenContract.transferFrom(
+            address(this),
+            msg.sender,
+            amount
+        );
+
+        if (success) {
+            return false;
+        }
+
+        accountTokens[msg.sender] -= amount;
+        return true;
     }
 }

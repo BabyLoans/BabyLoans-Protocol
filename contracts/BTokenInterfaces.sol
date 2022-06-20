@@ -1,11 +1,8 @@
 pragma solidity >=0.7.0 <0.9.0;
 
-abstract contract BTokenStorage {
-    /**
-     * @dev Guard variable for re-entrancy checks
-     */
-    bool internal _notEntered;
+import "./IBEP20.sol";
 
+abstract contract BTokenStorage {
     /**
      * @notice EIP-20 token name for this token
      */
@@ -107,4 +104,14 @@ abstract contract BTokenInterface is BTokenStorage {
         returns (uint256);
 
     function balanceOf(address owner) external view virtual returns (uint256);
+
+    function mint(IBEP20 tokenContract, uint256 amount)
+        public
+        virtual
+        returns (bool);
+
+    function burn(IBEP20 tokenContract, uint256 amount)
+        public
+        virtual
+        returns (bool);
 }
