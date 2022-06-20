@@ -105,13 +105,7 @@ abstract contract BTokenInterface is BTokenStorage {
 
     function balanceOf(address owner) external view virtual returns (uint256);
 
-    function mint(IBEP20 tokenContract, uint256 amount)
-        public
-        virtual
-        returns (bool);
+    function mint(uint256 amount) public virtual returns (bool);
 
-    function burn(IBEP20 tokenContract, uint256 amount)
-        public
-        virtual
-        returns (bool);
+    function burn(uint256 amount) public virtual returns (bool);
 }

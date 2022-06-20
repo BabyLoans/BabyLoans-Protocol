@@ -3,7 +3,26 @@ pragma solidity >=0.7.0 <0.9.0;
 import "./IBEP20.sol";
 import "./BTokenInterfaces.sol";
 
-abstract contract BToken is BTokenInterface {
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+abstract contract BToken is Ownable, BTokenInterface {
+    address public _underlyingContract;
+
+    constructor(address underlyingContract) {
+        _underlyingContract = underlyingContract;
+    }
+
+    /** Admin functions */
+
+    function changeUnderlyingContract(address newUnderlyingContract)
+        external
+        onlyOwner
+    {
+        _underlyingContract = newUnderlyingContract;
+    }
+
+    /** Users functions */
+
     function transfer(address dst, uint256 amount)
         public
         override
@@ -80,12 +99,11 @@ abstract contract BToken is BTokenInterface {
     /**
      * @notice Mint tokens for the minter
      */
-    function mint(IBEP20 tokenContract, uint256 amount)
-        public
-        override
-        returns (bool)
-    {
+    function mint(uint256 amount) public override returns (bool) {
         require(amount > 0, "amount must be greater than 0");
+
+        IBEP20 tokenContract = IBEP20(_underlyingContract);
+
         bool success = tokenContract.transferFrom(
             msg.sender,
             address(this),
@@ -103,12 +121,11 @@ abstract contract BToken is BTokenInterface {
     /**
      * @notice Burn tokens for the minter
      */
-    function burn(IBEP20 tokenContract, uint256 amount)
-        public
-        override
-        returns (bool)
-    {
+    function burn(uint256 amount) public override returns (bool) {
         require(amount > 0, "amount must be greater than 0");
+
+        IBEP20 tokenContract = IBEP20(_underlyingContract);
+
         bool success = tokenContract.transferFrom(
             address(this),
             msg.sender,
