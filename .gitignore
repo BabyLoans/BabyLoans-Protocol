@@ -100,5 +100,8 @@ dist
 # DynamoDB Local files
 .dynamodb/
 
+# Truffle build
+.build/
+
 # TernJS port file
 .tern-port
