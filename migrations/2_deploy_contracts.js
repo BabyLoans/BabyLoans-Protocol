@@ -1,27 +1,27 @@
-const DaiToken = artifacts.require("DaiToken");
-const DappToken = artifacts.require("DappToken");
-const TokenFarm = artifacts.require("TokenFarm");
+const BDaiToken = artifacts.require("BDaiToken");
+const BUsdtToken = artifacts.require("BUsdtToken");
+const BUsdcToken = artifacts.require("BUsdcToken");
+const TokenLending = artifacts.require("TokenLending");
 
-module.exports = async function(deployer, network, accounts) {
-  
-  //deploy dappToken
-  await deployer.deploy(DappToken)
-  const dappToken = await DappToken.deployed()
+module.exports = async function (deployer, network, accounts) {
+  //deploy BDaiToken
+  await deployer.deploy(BDaiToken);
+  const bDaiToken = await BDaiToken.deployed();
 
+  //deploy BUsdtToken
+  await deployer.deploy(BUsdtToken);
+  const bUsdtToken = await BUsdtToken.deployed();
 
-  //deploy daiToken 
-  await deployer.deploy(DaiToken)
-  const daiToken = await DaiToken.deployed()
-  
-  //deploy token Farm
-  await deployer.deploy(TokenFarm, DappToken.address, DaiToken.address)
-  const tokenFarm = await TokenFarm.deployed()
+  //deploy BUsdcToken
+  await deployer.deploy(BUsdcToken);
+  const bUsdcToken = await BUsdcToken.deployed();
 
-  //transfer all asset into Token Farm
-  await dappToken.transfer(tokenFarm.address, '1000000000000000000000000')  
-
-  //Transfer 100 Mock Dai tokens to investor account
-  await daiToken.transfer(accounts[1], '100000000000000000000')  
-
-
+  //deploy TokenLending
+  await deployer.deploy(
+    TokenLending,
+    BDaiToken.address,
+    BUsdtToken.address,
+    BUsdcToken.address
+  );
+  const tokenLending = await TokenLending.deployed();
 };
