@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.7.0 <0.9.0;
 
 import "./IBEP20.sol";
@@ -83,6 +84,11 @@ abstract contract BTokenInterface is BTokenStorage {
         address indexed spender,
         uint256 amount
     );
+
+    /**
+     * @notice EIP20 Mint event
+     */
+    event Mint(address indexed owner, uint256 amount);
 
     /*** User Interface ***/
 

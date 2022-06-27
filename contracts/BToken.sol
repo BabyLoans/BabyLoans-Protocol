@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.7.0 <0.9.0;
 
 import "./IBEP20.sol";
@@ -6,9 +7,6 @@ import "./BTokenInterfaces.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract BToken is Ownable, BTokenInterface {
-    // DAI 0x1AF3F329e8BE154074D8769D1FFa4eE058B1DBc3
-    // USDT 0x55d398326f99059fF775485246999027B3197955
-    // USDC 0xBA5Fe23f8a3a24BEd3236F05F2FcF35fd0BF0B5C
     constructor(
         address underlyingContract_,
         string memory name_,
@@ -51,8 +49,8 @@ contract BToken is Ownable, BTokenInterface {
         uint256 balance = balanceOf(src);
         require(balance >= amount, "not enough balance");
 
-        uint256 allowance = transferAllowances[src][msg.sender];
-        require(allowance >= amount, "not enough allowance");
+        uint256 allowances = transferAllowances[src][msg.sender];
+        require(allowances >= amount, "not enough allowance");
 
         accountTokens[src] -= amount;
         accountTokens[dst] += amount;
@@ -124,6 +122,7 @@ contract BToken is Ownable, BTokenInterface {
         }
 
         accountTokens[msg.sender] += amount;
+        emit Mint(msg.sender, amount);
         return true;
     }
 

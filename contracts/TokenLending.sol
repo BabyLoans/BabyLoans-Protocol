@@ -1,23 +1,24 @@
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.7.0 <0.9.0;
 
 import "./BToken.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract TokenLending {
+contract TokenLending is Ownable {
     mapping(string => BToken) public bTokens;
     mapping(string => bool) public existingBTokens;
 
-    constructor(
-        BToken bDaiToken,
-        BToken bUsdtToken,
-        BToken bUsdcToken
-    ) {
-        bTokens["DAI"] = bDaiToken;
-        bTokens["USDT"] = bUsdtToken;
-        bTokens["USDC"] = bUsdcToken;
+    /** Admin functions */
 
-        existingBTokens["DAI"] = true;
-        existingBTokens["USDT"] = true;
-        existingBTokens["USDC"] = true;
+    function addBToken(
+        address underlyingContract,
+        string memory name,
+        string memory symbol,
+        uint8 decimals
+    ) external onlyOwner {
+        BToken bToken = new BToken(underlyingContract, name, symbol, decimals);
+        bTokens[name] = bToken;
+        existingBTokens[name] = true;
     }
 
     /** Users functions */
