@@ -39,6 +39,11 @@ abstract contract BTokenStorage {
     uint256 public totalSupply;
 
     /**
+     * @notice Underlyint contract address
+     */
+    address public underlyingContract;
+
+    /**
      * @notice Official record of token balances for each account
      */
     mapping(address => uint256) internal accountTokens;

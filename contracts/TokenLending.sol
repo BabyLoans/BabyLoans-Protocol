@@ -1,18 +1,15 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import "./BToken.sol";
-import "./BDaiToken.sol";
-import "./BUsdtToken.sol";
-import "./BUsdcToken.sol";
 
 contract TokenLending {
     mapping(string => BToken) public bTokens;
     mapping(string => bool) public existingBTokens;
 
     constructor(
-        BDaiToken bDaiToken,
-        BUsdtToken bUsdtToken,
-        BUsdcToken bUsdcToken
+        BToken bDaiToken,
+        BToken bUsdtToken,
+        BToken bUsdcToken
     ) {
         bTokens["DAI"] = bDaiToken;
         bTokens["USDT"] = bUsdtToken;

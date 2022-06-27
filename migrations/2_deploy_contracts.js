@@ -1,27 +1,25 @@
-const BDaiToken = artifacts.require("BDaiToken");
-const BUsdtToken = artifacts.require("BUsdtToken");
-const BUsdcToken = artifacts.require("BUsdcToken");
+const BToken = artifacts.require("BToken");
 const TokenLending = artifacts.require("TokenLending");
 
 module.exports = async function (deployer, network, accounts) {
   //deploy BDaiToken
-  await deployer.deploy(BDaiToken);
-  const bDaiToken = await BDaiToken.deployed();
+  await deployer.deploy(BToken, "bDai", "bDai", 18);
+  const bDaiToken = await BToken.deployed();
 
   //deploy BUsdtToken
-  await deployer.deploy(BUsdtToken);
-  const bUsdtToken = await BUsdtToken.deployed();
+  await deployer.deploy(BToken, "bUsdt", "bUsdt", 18);
+  const bUsdtToken = await BToken.deployed();
 
   //deploy BUsdcToken
-  await deployer.deploy(BUsdcToken);
-  const bUsdcToken = await BUsdcToken.deployed();
+  await deployer.deploy(BToken, "bUsdc", "bUsdc", 18);
+  const bUsdcToken = await BToken.deployed();
 
   //deploy TokenLending
   await deployer.deploy(
     TokenLending,
-    BDaiToken.address,
-    BUsdtToken.address,
-    BUsdcToken.address
+    bDaiToken.address,
+    bUsdtToken.address,
+    bUsdcToken.address
   );
-  const tokenLending = await TokenLending.deployed();
+  await TokenLending.deployed();
 };

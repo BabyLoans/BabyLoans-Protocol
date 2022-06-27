@@ -5,11 +5,20 @@ import "./BTokenInterfaces.sol";
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-abstract contract BToken is Ownable, BTokenInterface {
-    address public _underlyingContract;
-
-    constructor(address underlyingContract) {
-        _underlyingContract = underlyingContract;
+contract BToken is Ownable, BTokenInterface {
+    // DAI 0x1AF3F329e8BE154074D8769D1FFa4eE058B1DBc3
+    // USDT 0x55d398326f99059fF775485246999027B3197955
+    // USDC 0xBA5Fe23f8a3a24BEd3236F05F2FcF35fd0BF0B5C
+    constructor(
+        address underlyingContract_,
+        string memory name_,
+        string memory symbol_,
+        uint8 decimal_
+    ) {
+        underlyingContract = underlyingContract_;
+        name = name_;
+        symbol = symbol_;
+        decimals = decimal_;
     }
 
     /** Admin functions */
@@ -18,7 +27,7 @@ abstract contract BToken is Ownable, BTokenInterface {
         external
         onlyOwner
     {
-        _underlyingContract = newUnderlyingContract;
+        underlyingContract = newUnderlyingContract;
     }
 
     /** Users functions */
@@ -102,7 +111,7 @@ abstract contract BToken is Ownable, BTokenInterface {
     function mint(uint256 amount) public override returns (bool) {
         require(amount > 0, "amount must be greater than 0");
 
-        IBEP20 tokenContract = IBEP20(_underlyingContract);
+        IBEP20 tokenContract = IBEP20(underlyingContract);
 
         bool success = tokenContract.transferFrom(
             msg.sender,
@@ -124,7 +133,7 @@ abstract contract BToken is Ownable, BTokenInterface {
     function burn(uint256 amount) public override returns (bool) {
         require(amount > 0, "amount must be greater than 0");
 
-        IBEP20 tokenContract = IBEP20(_underlyingContract);
+        IBEP20 tokenContract = IBEP20(underlyingContract);
 
         bool success = tokenContract.transferFrom(
             address(this),
