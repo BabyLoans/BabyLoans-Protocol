@@ -29,14 +29,14 @@ contract TokenLending is Ownable {
     function mint(string memory entry, uint256 amount) external {
         BToken bToken = getBToken(entry);
 
-        bool success = bToken.mint(amount);
+        bool success = bToken.mint(msg.sender, amount);
         require(success);
     }
 
     function redeem(string memory entry, uint256 amount) external {
         BToken bToken = getBToken(entry);
 
-        bool success = bToken.burn(amount);
+        bool success = bToken.burn(msg.sender, amount);
         require(success);
     }
 
