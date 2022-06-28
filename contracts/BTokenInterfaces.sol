@@ -45,6 +45,11 @@ abstract contract BTokenStorage {
     address public underlyingContract;
 
     /**
+     * @notice TokenLending contract address
+     */
+    address public tokenLendingContract;
+
+    /**
      * @notice Official record of token balances for each account
      */
     mapping(address => uint256) internal accountTokens;

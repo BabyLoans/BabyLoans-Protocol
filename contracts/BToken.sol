@@ -11,12 +11,15 @@ contract BToken is Ownable, BTokenInterface {
         address underlyingContract_,
         string memory name_,
         string memory symbol_,
-        uint8 decimal_
+        uint8 decimal_,
+        address tokenLendingContract_
     ) {
         underlyingContract = underlyingContract_;
         name = name_;
         symbol = symbol_;
         decimals = decimal_;
+
+        tokenLendingContract = tokenLendingContract_;
     }
 
     /** Admin functions */
@@ -26,6 +29,13 @@ contract BToken is Ownable, BTokenInterface {
         onlyOwner
     {
         underlyingContract = newUnderlyingContract;
+    }
+
+    function changeTokenLendingContract(address newTokenLendingContract)
+        external
+        onlyOwner
+    {
+        tokenLendingContract = newTokenLendingContract;
     }
 
     /** Users functions */
@@ -103,12 +113,21 @@ contract BToken is Ownable, BTokenInterface {
         return transferAllowances[owner][spender];
     }
 
+    modifier onlyTokenLending() {
+        require(
+            msg.sender == tokenLendingContract,
+            "Error, only the TokenLending contract can use this function"
+        );
+        _;
+    }
+
     /**
      * @notice Mint tokens for the minter
      */
     function mint(address minter, uint256 amount)
         public
         override
+        onlyTokenLending
         returns (bool)
     {
         require(amount > 0, "amount must be greater than 0");
@@ -136,6 +155,7 @@ contract BToken is Ownable, BTokenInterface {
     function burn(address burner, uint256 amount)
         public
         override
+        onlyTokenLending
         returns (bool)
     {
         require(amount > 0, "amount must be greater than 0");

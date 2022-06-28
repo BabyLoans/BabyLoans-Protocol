@@ -16,7 +16,13 @@ contract TokenLending is Ownable {
         string memory symbol,
         uint8 decimals
     ) external onlyOwner {
-        BToken bToken = new BToken(underlyingContract, name, symbol, decimals);
+        BToken bToken = new BToken(
+            underlyingContract,
+            name,
+            symbol,
+            decimals,
+            address(this)
+        );
         bTokens[name] = bToken;
         existingBTokens[name] = true;
     }
