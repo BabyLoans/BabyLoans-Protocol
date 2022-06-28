@@ -154,5 +154,14 @@ blockchain/history
 #truffle
 yarn.lock
 package-lock.json
+.build/
+.build
+build
+
+# VSCODE
+.vscode
+.vscode/
+
+
 
 # End of https://www.toptal.com/developers/gitignore/api/solidity,soliditytruffle
