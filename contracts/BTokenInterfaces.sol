@@ -45,6 +45,11 @@ abstract contract BTokenStorage {
     address public underlyingContract;
 
     /**
+     * @notice TokenLending contract address
+     */
+    address public tokenLendingContract;
+
+    /**
      * @notice Official record of token balances for each account
      */
     mapping(address => uint256) internal accountTokens;
@@ -65,6 +70,8 @@ abstract contract BTokenInterface is BTokenStorage {
      * @notice Event emitted when tokens are minted
      */
     event Mint(address minter, uint256 mintAmount, uint256 mintTokens);
+
+    event Burn(address burner, uint256 burnAmount, uint256 redeemTokens);
 
     /**
      * @notice Event emitted when underlying is borrowed
@@ -121,7 +128,7 @@ abstract contract BTokenInterface is BTokenStorage {
 
     function balanceOf(address owner) external view virtual returns (uint256);
 
-    function mint(uint256 amount) public virtual returns (bool);
+    function mint(address minter, uint256 amount) public virtual returns (bool);
 
-    function burn(uint256 amount) public virtual returns (bool);
+    function burn(address burner, uint256 amount) public virtual returns (bool);
 }

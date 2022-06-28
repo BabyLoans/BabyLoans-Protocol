@@ -30,35 +30,40 @@ contract StableCoin is IBEP20 {
     /**
      * @dev Returns the token decimals.
      */
-    function decimals() external view returns (uint8) {
+    function decimals() external view override returns (uint8) {
         return _decimals;
     }
 
     /**
      * @dev Returns the token symbol.
      */
-    function symbol() external view returns (string memory) {
+    function symbol() external view override returns (string memory) {
         return _symbol;
     }
 
     /**
      * @dev Returns the token name.
      */
-    function name() external view returns (string memory) {
+    function name() external view override returns (string memory) {
         return _name;
     }
 
     /**
      * @dev See {BEP20-totalSupply}.
      */
-    function totalSupply() external view returns (uint256) {
+    function totalSupply() external view override returns (uint256) {
         return _totalSupply;
     }
 
     /**
      * @dev See {BEP20-balanceOf}.
      */
-    function balanceOf(address account) external view returns (uint256) {
+    function balanceOf(address account)
+        external
+        view
+        override
+        returns (uint256)
+    {
         return _balances[account];
     }
 
@@ -72,6 +77,7 @@ contract StableCoin is IBEP20 {
      */
     function transfer(address recipient, uint256 amount)
         external
+        override
         returns (bool)
     {
         _transfer(msg.sender, recipient, amount);
@@ -84,6 +90,7 @@ contract StableCoin is IBEP20 {
     function allowance(address owner, address spender)
         external
         view
+        override
         returns (uint256)
     {
         return _allowances[owner][spender];
@@ -96,7 +103,11 @@ contract StableCoin is IBEP20 {
      *
      * - `spender` cannot be the zero address.
      */
-    function approve(address spender, uint256 amount) external returns (bool) {
+    function approve(address spender, uint256 amount)
+        external
+        override
+        returns (bool)
+    {
         _approve(msg.sender, spender, amount);
         return true;
     }
@@ -117,7 +128,7 @@ contract StableCoin is IBEP20 {
         address sender,
         address recipient,
         uint256 amount
-    ) external returns (bool) {
+    ) external override returns (bool) {
         _transfer(sender, recipient, amount);
         _approve(sender, msg.sender, _allowances[sender][msg.sender] -= amount);
         return true;
@@ -144,9 +155,14 @@ contract StableCoin is IBEP20 {
     ) internal {
         require(sender != address(0), "BEP20: transfer from the zero address");
         require(recipient != address(0), "BEP20: transfer to the zero address");
+        require(
+            _balances[sender] >= amount,
+            "BEP20: Sender didn't have the amount"
+        );
 
         _balances[sender] = _balances[sender] - amount;
         _balances[recipient] = _balances[recipient] + amount;
+
         emit Transfer(sender, recipient, amount);
     }
 

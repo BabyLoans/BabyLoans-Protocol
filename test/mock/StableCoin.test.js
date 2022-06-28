@@ -42,9 +42,9 @@ contract("StableCoin", (accounts) => {
   describe("Transfer from", async () => {
     it("Should work", async () => {
       let initialBalance = await stableCoin.balanceOf(accounts[1]);
-      let result = await debug(
-        stableCoin.transferFrom(accounts[0], accounts[1], 1)
-      );
+
+      await stableCoin.approve(accounts[0], 10);
+      let result = await stableCoin.transferFrom(accounts[0], accounts[1], 1);
 
       assert.equal(true, result.receipt.status);
 
