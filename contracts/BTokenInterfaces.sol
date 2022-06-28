@@ -53,6 +53,11 @@ abstract contract BTokenStorage {
      * @notice Approved token transfer amounts on behalf of others
      */
     mapping(address => mapping(address => uint256)) internal transferAllowances;
+
+    // Mapping of account addresses to outstanding borrow balances
+    mapping(address => uint) internal accountBorrows;
+
+
 }
 
 abstract contract BTokenInterface is BTokenStorage {

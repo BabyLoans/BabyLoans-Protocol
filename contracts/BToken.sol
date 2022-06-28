@@ -147,4 +147,35 @@ contract BToken is Ownable, BTokenInterface {
         accountTokens[msg.sender] -= amount;
         return true;
     }
+
+    function getAccountSnapshot(address account) external view returns (uint, uint, uint) {
+        return (
+            0,
+            accountTokens[account],
+            borrowBalanceStoredInternal(account)
+        );
+    }
+   
+    /**
+     * @notice Return the borrow balance of account based on stored data
+     */
+    function borrowBalanceStored(address account) public view returns (uint) {
+        return borrowBalanceStoredInternal(account);
+    }
+
+    /**
+     * @notice Return the borrow balance of account based on stored data
+     */
+    function borrowBalanceStoredInternal(address account) internal view returns (uint) {
+
+        if(accountBorrows[account] > 0){
+            /* TODO return with interest calculated
+             *  recentBorrowBalance = borrower.borrowBalance * market.borrowIndex / borrower.borrowIndex
+            */
+            uint recentBorrowBalance = 0;
+            return recentBorrowBalance;
+        }
+        
+        return accountBorrows[account];
+    }
 }
