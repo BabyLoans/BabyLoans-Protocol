@@ -104,5 +104,10 @@ dist
 .build/
 .build
 build
+
+# VSCODE
+.vscode
+.vscode/
+
 # TernJS port file
 .tern-port
