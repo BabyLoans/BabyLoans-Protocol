@@ -2,8 +2,25 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import "./IBEP20.sol";
+import "./ComptrollerInterface.sol";
 
 abstract contract BTokenStorage {
+
+    /**
+     * @notice Administrator for this contract
+     */
+    address payable public admin;
+
+    /**
+     * @notice Underlying asset for this CToken
+     */
+    address public underlying;
+    
+    /**
+     * @notice Contract which oversees inter-cToken operations
+     */
+    ComptrollerInterface public comptroller;
+
     /**
      * @notice EIP-20 token name for this token
      */
@@ -25,6 +42,11 @@ abstract contract BTokenStorage {
     uint256 public accrualBlockNumber;
 
     /**
+     * @notice Accumulator of the total earned interest rate since the opening of the market
+     */
+    uint public borrowIndex;
+
+    /**
      * @notice Total amount of outstanding borrows of the underlying in this market
      */
     uint256 public totalBorrows;
@@ -43,11 +65,6 @@ abstract contract BTokenStorage {
      * @notice Underlyint contract address
      */
     address public underlyingContract;
-
-    /**
-     * @notice TokenLending contract address
-     */
-    address public tokenLendingContract;
 
     /**
      * @notice Official record of token balances for each account
@@ -71,23 +88,36 @@ abstract contract BTokenInterface is BTokenStorage {
      * @notice Indicator that this is a CToken contract (for inspection)
      */
     bool public constant isBToken = true;
+
+    /*** Admin Events ***/
+
+    /**
+     * @notice Event emitted when comptroller is changed
+     */
+    event NewComptroller(ComptrollerInterface oldComptroller, ComptrollerInterface newComptroller);
+
     
+    /*** Market Events ***/
+    
+    /**
+     * @notice Event emitted when interest is accrued
+     */
+    event AccrueInterest(uint cashPrior, uint interestAccumulated, uint borrowIndex, uint totalBorrows);
+
     /**
      * @notice Event emitted when tokens are minted
      */
     event Mint(address minter, uint256 mintAmount, uint256 mintTokens);
 
-    event Burn(address burner, uint256 burnAmount, uint256 redeemTokens);
+    /**
+     * @notice Event emitted when tokens are redeemed
+     */
+    event Redeem(address redeemer, uint redeemAmount, uint redeemTokens);
 
     /**
      * @notice Event emitted when underlying is borrowed
      */
-    event Borrow(
-        address borrower,
-        uint256 borrowAmount,
-        uint256 accountBorrows,
-        uint256 totalBorrows
-    );
+    event Borrow(address borrower, uint256 borrowAmount, uint256 accountBorrows, uint256 totalBorrows);
 
     /**
      * @notice EIP20 Transfer event
@@ -97,46 +127,25 @@ abstract contract BTokenInterface is BTokenStorage {
     /**
      * @notice EIP20 Approval event
      */
-    event Approval(
-        address indexed owner,
-        address indexed spender,
-        uint256 amount
-    );
+    event Approval(address indexed owner, address indexed spender, uint256 amount);
 
-    /**
-     * @notice EIP20 Mint event
-     */
-    event Mint(address indexed owner, uint256 amount);
+
+    event Burn(address burner, uint256 burnAmount, uint256 redeemTokens);
 
     /*** User Interface ***/
 
-    function transfer(address dst, uint256 amount)
-        external
-        virtual
-        returns (bool);
-
-    function transferFrom(
-        address src,
-        address dst,
-        uint256 amount
-    ) external virtual returns (bool);
-
-    function approve(address spender, uint256 amount)
-        external
-        virtual
-        returns (bool);
-
-    function allowance(address owner, address spender)
-        external
-        view
-        virtual
-        returns (uint256);
-
+    function mint(uint mintAmount) virtual external returns (uint);
+    function redeem(uint redeemTokens) virtual external returns (uint);
+    function transfer(address dst, uint256 amount) virtual external returns (bool);
+    function transferFrom(address src, address dst, uint256 amount) external virtual returns (bool);
+    function approve(address spender, uint256 amount) external virtual returns (bool);
+    function allowance(address owner, address spender) external view virtual returns (uint256);
     function balanceOf(address owner) external view virtual returns (uint256);
-
-    function mint(address minter, uint256 amount) public virtual returns (bool);
-
     function burn(address burner, uint256 amount) public virtual returns (bool);
-
     function getAccountInfo(address account) virtual external view returns (uint, uint, uint, uint);
+    function accrueInterest() virtual external returns (uint);
+
+    /*** Admin Functions ***/
+
+    function _setComptroller(ComptrollerInterface newComptroller) virtual external returns (uint);
 }

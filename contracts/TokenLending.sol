@@ -10,19 +10,9 @@ contract TokenLending is Ownable {
 
     /** Admin functions */
 
-    function addBToken(
-        address underlyingContract,
-        string memory name,
-        string memory symbol,
-        uint8 decimals
-    ) external onlyOwner {
-        BToken bToken = new BToken(
-            underlyingContract,
-            name,
-            symbol,
-            decimals,
-            address(this)
-        );
+    function addBToken(address bTokenAddress, string memory name
+    ) external {
+        BToken bToken = BToken(bTokenAddress);
         bTokens[name] = bToken;
         existingBTokens[name] = true;
     }
@@ -32,19 +22,19 @@ contract TokenLending is Ownable {
     /**
      * @notice supply token to a given address
      */
-    function mint(string memory entry, uint256 amount) external {
-        BToken bToken = getBToken(entry);
+    // function mint(string memory entry, uint256 amount) external {
+    //     BToken bToken = getBToken(entry);
 
-        bool success = bToken.mint(msg.sender, amount);
-        require(success);
-    }
+    //     bool success = bToken.mint(msg.sender, amount);
+    //     require(success);
+    // }
 
-    function redeem(string memory entry, uint256 amount) external {
-        BToken bToken = getBToken(entry);
+    // function redeem(string memory entry, uint256 amount) external {
+    //     BToken bToken = getBToken(entry);
 
-        bool success = bToken.burn(msg.sender, amount);
-        require(success);
-    }
+    //     bool success = bToken.burn(msg.sender, amount);
+    //     require(success);
+    // }
 
     /** Private function */
     function getBToken(string memory entry) private view returns (BToken) {

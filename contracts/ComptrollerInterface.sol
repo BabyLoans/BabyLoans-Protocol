@@ -10,7 +10,7 @@ contract ComptrollerStorage {
      */
     mapping(address => BToken[]) public accountAssets;
 
-    address admin;
+    address public admin;
 
     struct Market {
         // Whether or not this market is listed
@@ -69,6 +69,7 @@ abstract contract ComptrollerInterface is ComptrollerStorage {
     function mintAllowed(address bToken, address minter, uint mintAmount) virtual external returns (uint);
 
     function redeemAllowed(address bToken, address redeemer, uint redeemTokens) virtual external returns (uint);
+    function redeemVerify(address cToken, address redeemer, uint redeemAmount, uint redeemTokens) virtual external;
 
     function borrowAllowed(address bToken, address borrower, uint borrowAmount) virtual external returns (uint);
 

@@ -229,6 +229,23 @@ contract Comptroller is ComptrollerInterface{
         return uint(Error.NO_ERROR);
     }
 
+    /**
+     * @notice Validates redeem and reverts on rejection. May emit logs.
+     * @param bToken Asset being redeemed
+     * @param redeemer The address redeeming the tokens
+     * @param redeemAmount The amount of the underlying asset being redeemed
+     * @param redeemTokens The number of tokens being redeemed
+     */
+    function redeemVerify(address bToken, address redeemer, uint redeemAmount, uint redeemTokens) override external {
+        // Shh - currently unused
+        bToken;
+        redeemer;
+
+        // Require tokens is zero or amount is also zero
+        if (redeemTokens == 0 && redeemAmount > 0) {
+            revert("redeemTokens zero");
+        }
+    }
 
     /**
      * @notice Checks if the account should be allowed to borrow the underlying asset of the given market
@@ -441,6 +458,15 @@ contract Comptroller is ComptrollerInterface{
 
 
     /*** Admin Functions ***/
+
+    
+    /**
+     * @notice Checks caller is admin, or this contract is becoming the new implementation
+     */
+    function _isAdmin() external view returns (bool) {
+        return msg.sender == admin;
+    }
+
     
     /**
       * @notice Add the market to the markets mapping and set it as listed
