@@ -44,6 +44,7 @@ contract ComptrollerStorage {
     enum Error {
         NO_ERROR,
         MARKET_NOT_LISTED,
+        MARKET_ALREADY_LISTED,
         GET_ACCOUNT_INFO_ERROR,
         INSUFFICIENT_LIQUIDITY,
         NONZERO_BORROW_BALANCE,

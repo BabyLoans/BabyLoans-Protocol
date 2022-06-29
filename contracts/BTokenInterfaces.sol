@@ -66,6 +66,12 @@ abstract contract BTokenStorage {
 }
 
 abstract contract BTokenInterface is BTokenStorage {
+
+     /**
+     * @notice Indicator that this is a CToken contract (for inspection)
+     */
+    bool public constant isBToken = true;
+    
     /**
      * @notice Event emitted when tokens are minted
      */
