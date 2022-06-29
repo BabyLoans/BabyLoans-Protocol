@@ -4,7 +4,6 @@ pragma solidity >=0.7.0 <0.9.0;
 import "./BToken.sol";
 
 contract ComptrollerStorage {
-
     /**
      * @notice Per-account mapping of "assets you are in", capped by maxAssets
      */
@@ -15,15 +14,12 @@ contract ComptrollerStorage {
     struct Market {
         // Whether or not this market is listed
         bool isListed;
-
         //  Multiplier representing the most one can borrow against their collateral in this market.
         //  For instance, 0.9 to allow borrowing 90% of collateral value.
         //  Must be between 0 and 1, and stored as a mantissa.
-        uint collateralFactorMantissa;
-
+        uint256 collateralFactorMantissa;
         // Per-market mapping of "accounts in this asset"
         mapping(address => bool) accountMembership;
-
         // Whether or not this market receives COMP
         bool isComped;
     }
@@ -35,11 +31,10 @@ contract ComptrollerStorage {
     mapping(address => Market) public markets;
 
     // @notice Borrow caps enforced by borrowAllowed for each cToken address. Defaults to zero which corresponds to unlimited borrowing.
-    mapping(address => uint) public borrowCaps;
+    mapping(address => uint256) public borrowCaps;
 
     /// @notice A list of all markets
     BToken[] public allMarkets;
-
 
     enum Error {
         NO_ERROR,
@@ -48,10 +43,9 @@ contract ComptrollerStorage {
         GET_ACCOUNT_INFO_ERROR,
         INSUFFICIENT_LIQUIDITY,
         NONZERO_BORROW_BALANCE,
-        REJECTION, 
+        REJECTION,
         UNAUTHORIZED
     }
-
 }
 
 abstract contract ComptrollerInterface is ComptrollerStorage {
@@ -60,25 +54,46 @@ abstract contract ComptrollerInterface is ComptrollerStorage {
 
     /*** Assets You Are In ***/
 
-    function enterMarkets(address[] calldata bTokens) virtual external returns (uint[] memory);
+    function enterMarkets(address[] calldata bTokens)
+        external
+        virtual
+        returns (uint256[] memory);
 
-    function exitMarket(address bToken) virtual external returns (uint);
+    function exitMarket(address bToken) external virtual returns (uint256);
 
     /*** Policy Hooks ***/
 
-    function mintAllowed(address bToken, address minter, uint mintAmount) virtual external returns (uint);
+    function mintAllowed(
+        address bToken,
+        address minter,
+        uint256 mintAmount
+    ) external virtual returns (uint256);
 
-    function redeemAllowed(address bToken, address redeemer, uint redeemTokens) virtual external returns (uint);
-    function redeemVerify(address cToken, address redeemer, uint redeemAmount, uint redeemTokens) virtual external;
+    function redeemAllowed(
+        address bToken,
+        address redeemer,
+        uint256 redeemTokens
+    ) external virtual returns (uint256);
 
-    function borrowAllowed(address bToken, address borrower, uint borrowAmount) virtual external returns (uint);
+    function redeemVerify(
+        address cToken,
+        address redeemer,
+        uint256 redeemAmount,
+        uint256 redeemTokens
+    ) external virtual;
+
+    function borrowAllowed(
+        address bToken,
+        address borrower,
+        uint256 borrowAmount
+    ) external virtual returns (uint256);
 
     function repayBorrowAllowed(
         address bToken,
         address payer,
         address borrower,
-        uint repayAmount) virtual external returns (uint);
-    
+        uint256 repayAmount
+    ) external virtual returns (uint256);
 
     // function liquidateBorrowAllowed(
     //     address bTokenBorrowed,
@@ -86,7 +101,6 @@ abstract contract ComptrollerInterface is ComptrollerStorage {
     //     address liquidator,
     //     address borrower,
     //     uint repayAmount) virtual external returns (uint);
-    
 
     // function seizeAllowed(
     //     address bTokenCollateral,
@@ -94,15 +108,19 @@ abstract contract ComptrollerInterface is ComptrollerStorage {
     //     address liquidator,
     //     address borrower,
     //     uint seizeTokens) virtual external returns (uint);
-  
 
-    function transferAllowed(address bToken, address src, address dst, uint transferTokens) virtual external returns (uint);
-   
+    function transferAllowed(
+        address bToken,
+        address src,
+        address dst,
+        uint256 transferTokens
+    ) external virtual returns (uint256);
+
     /*** Liquidity/Liquidation Calculations ***/
 
-//     function liquidateCalculateSeizeTokens(
-//         address bTokenBorrowed,
-//         address bTokenCollateral,
-//         uint repayAmount) virtual external view returns (uint, uint);
-// 
+    //     function liquidateCalculateSeizeTokens(
+    //         address bTokenBorrowed,
+    //         address bTokenCollateral,
+    //         uint repayAmount) virtual external view returns (uint, uint);
+    //
 }
