@@ -131,4 +131,6 @@ abstract contract BTokenInterface is BTokenStorage {
     function mint(address minter, uint256 amount) public virtual returns (bool);
 
     function burn(address burner, uint256 amount) public virtual returns (bool);
+
+    function getAccountInfo(address account) virtual external view returns (uint, uint, uint, uint);
 }

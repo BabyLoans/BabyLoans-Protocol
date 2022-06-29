@@ -173,34 +173,19 @@ contract BToken is Ownable, BTokenInterface {
         return true;
     }
 
-    function getAccountSnapshot(address account) external view returns (uint, uint, uint) {
+     /**
+     * @notice Get a snapshot of the account's balances, and the cached exchange rate
+     * @dev This is used by comptroller to more efficiently perform liquidity checks.
+     * @param account Address of the account to snapshot
+     * @return (possible error, token balance, borrow balance, exchange rate mantissa)
+     */
+    function getAccountInfo(address account) override external view returns (uint, uint, uint, uint) {
         return (
             0,
             accountTokens[account],
-            borrowBalanceStoredInternal(account)
+            accountBorrows[account],
+            //TODO FOR RATE INTEREST
+            0
         );
-    }
-   
-    /**
-     * @notice Return the borrow balance of account based on stored data
-     */
-    function borrowBalanceStored(address account) public view returns (uint) {
-        return borrowBalanceStoredInternal(account);
-    }
-
-    /**
-     * @notice Return the borrow balance of account based on stored data
-     */
-    function borrowBalanceStoredInternal(address account) internal view returns (uint) {
-
-        if(accountBorrows[account] > 0){
-            /* TODO return with interest calculated
-             *  recentBorrowBalance = borrower.borrowBalance * market.borrowIndex / borrower.borrowIndex
-            */
-            uint recentBorrowBalance = 0;
-            return recentBorrowBalance;
-        }
-        
-        return accountBorrows[account];
     }
 }
