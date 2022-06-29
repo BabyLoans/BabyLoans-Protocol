@@ -64,7 +64,7 @@ contract("Supply Asset", (accounts) => {
         await stableCoin.approve(bToken.address, 10000);
         
         let mintResult = await bToken.mint(10);
-        console.log(mintResult)
+        
         //load Btoken amount of stable 
         let accountBalanceOfStable = (await stableCoin.balanceOf(accounts[0])).toNumber();
         
@@ -82,6 +82,8 @@ contract("Supply Asset", (accounts) => {
   
      
     });
+
+
 
 
 

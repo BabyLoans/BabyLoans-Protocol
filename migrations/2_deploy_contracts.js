@@ -1,6 +1,6 @@
-const TokenLending = artifacts.require("TokenLending");
-
 const StableCoin = artifacts.require("StableCoin");
+const BTokenImmutable = artifacts.require("BTokenImmutable");
+const Comptroller = artifacts.require("Comptroller");
 
 module.exports = async function (deployer, network, accounts) {
   /*
@@ -28,12 +28,15 @@ module.exports = async function (deployer, network, accounts) {
 
   if (network != "live") {
     await deployer.deploy(StableCoin, "mUsdt", "mUsdt", 18, 1000000000000);
-    await deployer.deploy(StableCoin, "mUsdc", "mUsdc", 18, 1000000000000);
-    await deployer.deploy(StableCoin, "mDai", "mDai", 18, 1000000000000);
     await StableCoin.deployed();
   }
 
-  // Deploy TokenLending
-  await deployer.deploy(TokenLending);
-  await TokenLending.deployed();
+  // Deploy Comptroller
+  await deployer.deploy(Comptroller);
+  await Comptroller.deployed();
+
+  // Deploy BUSDT
+  await deployer.deploy(BTokenImmutable, StableCoin.address, Comptroller.address, "bMUsdt", "bMUsdt", 18,accounts[0]);
+  await BTokenImmutable.deployed();
+
 };
