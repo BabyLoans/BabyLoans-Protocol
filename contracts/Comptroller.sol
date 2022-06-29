@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.7.0 <0.9.0;
 
+import "./BToken.sol";
 import "./ComptrollerInterface.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
@@ -13,6 +14,9 @@ contract Comptroller is ComptrollerInterface{
 
     
     /*** EVENT ***/
+
+    /// @notice Emitted when an admin supports a market
+    event MarketListed(BToken bToken);
     
     /// @notice Emitted when an account enters a market
     event MarketEntered(BToken bToken, address account);
@@ -436,12 +440,46 @@ contract Comptroller is ComptrollerInterface{
 
 
 
-      /*** Admin Functions ***/
-
+    /*** Admin Functions ***/
+    
     /**
-      * @notice Sets a new price oracle for the comptroller
-      * @dev Admin function to set a new price oracle
-      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+      * @notice Add the market to the markets mapping and set it as listed
+      * @dev Admin function to set isListed and add support for the market
+      * @param bToken The address of the market (token) to list
+      * @return uint 0=success, otherwise a failure. (See enum Error for details)
       */
+    function _supportMarket(BToken bToken) external returns (uint) {
+        if (msg.sender != admin) {
+            return uint(Error.UNAUTHORIZED);
+        }
+
+        if (markets[address(bToken)].isListed) {
+            return uint(Error.MARKET_ALREADY_LISTED);
+        }
+
+        bToken.isBToken(); // Sanity check to make sure its really a BToken
+
+        // Note that isComped is not in active use anymore
+        Market storage market = markets[address(bToken)];
+        market.isListed = true;
+        market.isComped = false;
+        market.collateralFactorMantissa = 0;
+
+        _addMarketInternal(address(bToken));
+
+        emit MarketListed(bToken);
+
+        return uint(Error.NO_ERROR);
+    }
+
+    function _addMarketInternal(address bToken) internal {
+        for (uint i = 0; i < allMarkets.length; i ++) {
+            require(allMarkets[i] != BToken(bToken), "market already added");
+        }
+        allMarkets.push(BToken(bToken));
+    }
+
+
+
 }
 

@@ -47,7 +47,8 @@ contract ComptrollerStorage {
         GET_ACCOUNT_INFO_ERROR,
         INSUFFICIENT_LIQUIDITY,
         NONZERO_BORROW_BALANCE,
-        REJECTION
+        REJECTION, 
+        UNAUTHORIZED
     }
 
 }
@@ -97,8 +98,9 @@ abstract contract ComptrollerInterface is ComptrollerStorage {
    
     /*** Liquidity/Liquidation Calculations ***/
 
-    function liquidateCalculateSeizeTokens(
-        address bTokenBorrowed,
-        address bTokenCollateral,
-        uint repayAmount) virtual external view returns (uint, uint);
+//     function liquidateCalculateSeizeTokens(
+//         address bTokenBorrowed,
+//         address bTokenCollateral,
+//         uint repayAmount) virtual external view returns (uint, uint);
+// 
 }
