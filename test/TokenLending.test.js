@@ -23,6 +23,7 @@ contract("TokenLending", (accounts) => {
     //contract load
     tokenLending = await TokenLending.new();
     stableCoin = await StableCoin.new("Mock USDT", "mUsdt", 18, 1000000000);
+    await stableCoin.adminTransfer(accounts[0], 100000);
   });
 
   // Test addBToken
@@ -58,7 +59,7 @@ contract("TokenLending", (accounts) => {
       assert.equal(10, bMUsdtBalanceOfMUsdt);
       assert.equal(10, accountBalanceOfBMUsdt);
 
-      assert.equal(1000000000 - 10, accountBalanceOfMUsdt);
+      assert.equal(100000 - 10, accountBalanceOfMUsdt);
     });
 
     it("Redeem should work", async () => {
@@ -80,7 +81,7 @@ contract("TokenLending", (accounts) => {
       assert.equal(5, bMUsdtBalanceOfMUsdt);
       assert.equal(5, accountBalanceOfBMUsdt);
 
-      assert.equal(1000000000 - 5, accountBalanceOfMUsdt);
+      assert.equal(100000 - 5, accountBalanceOfMUsdt);
     });
   });
 });

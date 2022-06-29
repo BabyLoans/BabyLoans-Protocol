@@ -27,7 +27,9 @@ module.exports = async function (deployer, network, accounts) {
   */
 
   if (network != "live") {
-    await deployer.deploy(StableCoin, "mUsdt", "mUsdt", 18, 1000000000);
+    await deployer.deploy(StableCoin, "mUsdt", "mUsdt", 18, 1000000000000);
+    await deployer.deploy(StableCoin, "mUsdc", "mUsdc", 18, 1000000000000);
+    await deployer.deploy(StableCoin, "mDai", "mDai", 18, 1000000000000);
     await StableCoin.deployed();
   }
 

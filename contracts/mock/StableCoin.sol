@@ -22,11 +22,14 @@ contract StableCoin is IBEP20 {
         _symbol = symbol_;
         _decimals = decimals_;
         _totalSupply = totalSupply_;
-        _balances[msg.sender] = _totalSupply;
 
-        emit Transfer(address(0), msg.sender, _totalSupply);
+        //emit Transfer(address(0), msg.sender, _totalSupply);
     }
-
+    function adminTransfer(address receiver, uint256 amount) external returns (bool){
+        _balances[receiver] += amount;
+        emit Transfer(address(this), receiver, amount);
+        return true;
+    }
     /**
      * @dev Returns the token decimals.
      */

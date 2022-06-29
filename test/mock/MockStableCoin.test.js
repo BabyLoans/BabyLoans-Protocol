@@ -8,7 +8,7 @@ function tokens(n) {
   return web3.utils.toWei(n, "ether");
 }
 
-contract("StableCoin", (accounts) => {
+contract("MockStableCoin", (accounts) => {
   //write test inside here....
 
   let stableCoin;
@@ -16,13 +16,15 @@ contract("StableCoin", (accounts) => {
   before(async () => {
     //contract load
     stableCoin = await StableCoin.new("Mock USDT", "mUsdt", 18, 1000000000);
+    await stableCoin.adminTransfer(accounts[0], 100000);
+
   });
 
   // Test balanceOf
   describe("Balance of me", async () => {
-    it("has 1000000000 tokens", async () => {
+    it("has 100000 tokens", async () => {
       let balance = await stableCoin.balanceOf(accounts[0]);
-      assert.equal(balance.toNumber(), 1000000000);
+      assert.equal(balance.toNumber(), 100000);
     });
   });
 
