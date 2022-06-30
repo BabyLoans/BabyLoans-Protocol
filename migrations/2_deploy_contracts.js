@@ -32,12 +32,12 @@ module.exports = async function (deployer, network, accounts) {
       "Usdt",
       "Usdt",
       18,
-      web3.utils.toWei(1000000000000)
+      web3.utils.toWei("1000000000000")
     );
     let stableCoin = await StableCoin.deployed();
     stableCoin.adminTransfer(
       accounts[0],
-      web3.utils.toWei(10000)
+      web3.utils.toWei("10000")
     );
   }
 
