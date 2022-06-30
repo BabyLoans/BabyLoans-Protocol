@@ -181,7 +181,7 @@ contract BToken is BTokenInterface {
      * @dev Accrues interest whether or not the operation succeeds, unless reverted
      * @param mintAmount The amount of the underlying asset to supply
      */
-    function mintInternal(uint mintAmount) internal{
+    function mintInternal(uint mintAmount) internal  nonReentrant {
         //TODO ADD INTEREST
         accrueInterest();
 
@@ -195,7 +195,7 @@ contract BToken is BTokenInterface {
      * @dev Accrues interest whether or not the operation succeeds, unless reverted
      * @param redeemTokens The number of cTokens to redeem into underlying
      */
-    function redeemInternal(uint redeemTokens) internal{  // TODO nonReentrant {
+    function redeemInternal(uint redeemTokens) internal  nonReentrant {
         //TODO ADD INTEREST
         accrueInterest();
         // redeemFresh emits redeem-specific logs on errors, so we don't need to
@@ -207,7 +207,7 @@ contract BToken is BTokenInterface {
      * @dev Accrues interest whether or not the operation succeeds, unless reverted
      * @param redeemAmount The number of cTokens to redeem into underlying
      */
-    function redeemUnderlyingInternal(uint redeemAmount) internal{  // TODO nonReentrant {
+    function redeemUnderlyingInternal(uint redeemAmount) internal nonReentrant {
         //TODO ADD INTEREST
         accrueInterest();
         // redeemFresh emits redeem-specific logs on errors, so we don't need to
@@ -349,7 +349,7 @@ contract BToken is BTokenInterface {
       * @notice Sender borrows assets from the protocol to their own address
       * @param borrowAmount The amount of the underlying asset to borrow
       */
-    function borrowInternal(uint borrowAmount) internal { // TODO nonReentrant {
+    function borrowInternal(uint borrowAmount) internal nonReentrant {
         accrueInterest();
         // borrowFresh emits borrow-specific logs on errors, so we don't need to
         borrowFresh(payable(msg.sender), borrowAmount);
@@ -434,7 +434,7 @@ contract BToken is BTokenInterface {
      * @notice Sender repays their own borrow
      * @param repayAmount The amount to repay, or -1 for the full outstanding amount
      */
-    function repayBorrowInternal(uint repayAmount) internal { // TODO nonReentrant {
+    function repayBorrowInternal(uint repayAmount) internal nonReentrant {
         accrueInterest();
         // repayBorrowFresh emits repay-borrow-specific logs on errors, so we don't need to
         repayBorrowFresh(msg.sender, msg.sender, repayAmount);
@@ -445,7 +445,7 @@ contract BToken is BTokenInterface {
      * @param borrower the account with the debt being payed off
      * @param repayAmount The amount to repay, or -1 for the full outstanding amount
      */
-    function repayBorrowBehalfInternal(address borrower, uint repayAmount) internal { // TODO nonReentrant {
+    function repayBorrowBehalfInternal(address borrower, uint repayAmount) internal nonReentrant {
         accrueInterest();
         // repayBorrowFresh emits repay-borrow-specific logs on errors, so we don't need to
         repayBorrowFresh(msg.sender, borrower, repayAmount);
@@ -637,6 +637,18 @@ contract BToken is BTokenInterface {
         emit NewComptroller(oldComptroller, newComptroller);
 
         return 0;
+    }
+
+      /*** Reentrancy Guard ***/
+
+    /**
+     * @dev Prevents a contract from calling itself, directly or indirectly.
+     */
+    modifier nonReentrant() {
+        require(_notEntered, "re-entered");
+        _notEntered = false;
+        _;
+        _notEntered = true; // get a gas-refund post-Istanbul
     }
 
 
