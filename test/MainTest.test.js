@@ -16,9 +16,9 @@ contract("Init new Asset", (accounts) => {
     //contract load
     comptroller = await Comptroller.new();
     //create a stable Coin
-    stableCoin = await StableCoin.new("Mock USDT", "mUsdt", 18, 1000000000);
+    stableCoin = await StableCoin.new("Mock USDT", "mUsdt", 18, web3.utils.toWei(1000000000000));
     //transfer some Liquidity to admin
-    await stableCoin.adminTransfer(accounts[0], 100000);
+    await stableCoin.adminTransfer(accounts[0], web3.utils.toWei(10000));
   });
 
   // Test addBToken
@@ -33,7 +33,7 @@ contract("Init new Asset", (accounts) => {
         accounts[0]
       );
       assert.equal(true, await bToken.isBToken());
-      //add BToken from new Method
+      //add BToken from new Mweb3od
       await comptroller._supportMarket(bToken.address);
 
       let allMarkets = await comptroller.getAllMarkets();
@@ -53,9 +53,9 @@ contract("Supply Asset", (accounts) => {
     comptroller = await Comptroller.new();
 
     //create a stable Coin
-    stableCoin = await StableCoin.new("Mock USDT", "mUsdt", 18, 1000000000);
+    stableCoin = await StableCoin.new("Mock USDT", "mUsdt", 18, web3.utils.toWei(1000000000000));
     //transfer some Liquidity to admin
-    await stableCoin.adminTransfer(accounts[0], 100000);
+    await stableCoin.adminTransfer(accounts[0], web3.utils.toWei(10000));
 
     //Create BToken
     bToken = await BTokenImmutable.new(
@@ -76,9 +76,9 @@ contract("Supply Asset", (accounts) => {
     it("Should Mint and receive BToken", async () => {
       assert.equal(true, await bToken.isBToken());
 
-      await stableCoin.approve(bToken.address, 10000);
+      await stableCoin.approve(bToken.address,  web3.utils.toWei(10000));
 
-      await bToken.mint(10);
+      await bToken.mint(web3.utils.toWei(10));
 
       //load your amount of stable
       let accountBalanceOfStable = (
@@ -95,9 +95,9 @@ contract("Supply Asset", (accounts) => {
         await bToken.balanceOf(accounts[0])
       ).toNumber();
 
-      assert.equal(100000 - 10, accountBalanceOfStable);
-      assert.equal(10, bTokenBalanceOfStable);
-      assert.equal(10, accountBalanceOfBToken);
+      assert.equal(10000 - 10, web3.utils.fromWei(accountBalanceOfStable));
+      assert.equal(10,  web3.utils.fromWei(bTokenBalanceOfStable));
+      assert.equal(10, web3.utils.fromWei(accountBalanceOfBToken));
     });
   });
 });
@@ -110,9 +110,9 @@ contract("Redeem Asset", (accounts) => {
     //contract load
     comptroller = await Comptroller.new();
     //create a stable Coin
-    stableCoin = await StableCoin.new("Mock USDT", "mUsdt", 18, 1000000000);
+    stableCoin = await StableCoin.new("Mock USDT", "mUsdt", 18, web3.utils.toWei(1000000000000));
     //transfer some Liquidity to admin
-    await stableCoin.adminTransfer(accounts[0], 100000);
+    await stableCoin.adminTransfer(accounts[0], web3.utils.toWei(100000));
     //Create BToken
     bToken = await BTokenImmutable.new(
       stableCoin.address,
@@ -125,9 +125,9 @@ contract("Redeem Asset", (accounts) => {
     //Add BToken to Market Comptroller
     await comptroller._supportMarket(bToken.address);
     //approve transaction
-    await stableCoin.approve(bToken.address, 10);
+    await stableCoin.approve(bToken.address, web3.utils.toWei(10000));
     //mint 10
-    await bToken.mint(10);
+    await bToken.mint(web3.utils.toWei(10));
   });
 
   // Test redeem
@@ -135,10 +135,10 @@ contract("Redeem Asset", (accounts) => {
     it("you have btoken and you want stable", async () => {
       assert.equal(true, await bToken.isBToken());
       //approve transaction
-      await stableCoin.approve(bToken.address, 10);
+      await stableCoin.approve(bToken.address, web3.utils.toWei(10000));
       //redeem 10
-      await bToken.redeem(5);
-      await bToken.redeemUnderlying(5);
+      await bToken.redeem(web3.utils.toWei(5));
+      await bToken.redeemUnderlying(web3.utils.toWei(5));
 
       //load your amount of stable
       let accountBalanceOfStable = (
@@ -149,10 +149,10 @@ contract("Redeem Asset", (accounts) => {
         await bToken.balanceOf(accounts[0])
       ).toNumber();
 
-      console.log("Stable in account[0]:",accountBalanceOfStable)
-      console.log("BToken in account[0]:",accountBalanceOfBToken)
-      assert.equal(100000, accountBalanceOfStable);
-      assert.equal(0, accountBalanceOfBToken);
+      console.log("Stable in account[0]:",web3.utils.fromWei(accountBalanceOfStable))
+      console.log("BToken in account[0]:",web3.utils.fromWei(accountBalanceOfBToken))
+      assert.equal(100000, web3.utils.fromWei(accountBalanceOfStable));
+      assert.equal(0, web3.utils.fromWei(accountBalanceOfBToken));
     });
   });
 });
@@ -165,9 +165,9 @@ contract("Redeem Asset", (accounts) => {
       //contract load
       comptroller = await Comptroller.new();
       //create a stable Coin
-      stableCoin = await StableCoin.new("Mock USDT", "mUsdt", 18, 1000000000);
+      stableCoin = await StableCoin.new("Mock USDT", "mUsdt", 18, web3.utils.toWei(1000000000000));
       //transfer some Liquidity to admin
-      await stableCoin.adminTransfer(accounts[0], 100000);
+      await stableCoin.adminTransfer(accounts[0], web3.utils.toWei(10000));
       //Create BToken
       bToken = await BTokenImmutable.new(
         stableCoin.address,
@@ -180,37 +180,36 @@ contract("Redeem Asset", (accounts) => {
       //Add BToken to Market Comptroller
       await comptroller._supportMarket(bToken.address);
       //approve transaction
-      await stableCoin.approve(bToken.address, 10);
+      await stableCoin.approve(bToken.address, web3.utils.toWei(10000));
       
       //mint 10
-      await bToken.mint(10);
+      await bToken.mint(web3.utils.toWei(10));
     });
   
     // Test redeem
     describe("Borrow Btoken for Stable", async () => {
       it("If you have minted you can borrow ", async () => {
         assert.equal(true, await bToken.isBToken());
-        await bToken.borrow(5);
+        await bToken.borrow(web3.utils.toWei(5));
   
         //load your amount of stable
         let accountBalanceOfStable = (await stableCoin.balanceOf(accounts[0])).toNumber();
         //load your amount of Btoken
         let accountBalanceOfBToken = (await bToken.balanceOf(accounts[0])).toNumber();
   
-        console.log("Stable in account[0]:",accountBalanceOfStable)
-        console.log("BToken in account[0]:",accountBalanceOfBToken)
+        console.log("Stable in account[0]:",web3.utils.fromWei(accountBalanceOfStable))
+        console.log("BToken in account[0]:",web3.utils.fromWei(accountBalanceOfBToken))
 
-        assert.equal(99995, accountBalanceOfStable);
-        assert.equal(10, accountBalanceOfBToken);
+        assert.equal(99995, web3.utils.fromWei(accountBalanceOfStable));
+        assert.equal(10, web3.utils.fromWei(accountBalanceOfBToken));
 
-        // TODO TEST LA VAR currentBorrow
       });
 
       it("Revert if borrow without enough Collateral", async () => {
         assert.equal(true, await bToken.isBToken());
         //borrow 10
         await truffleAssert.reverts(
-          bToken.borrow(1),
+          bToken.borrow(web3.utils.toWei(10000000000000000)),
           "revert",
           "Error: contract does not revert transaction"
         );
