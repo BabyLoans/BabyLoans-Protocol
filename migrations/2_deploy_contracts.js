@@ -32,12 +32,12 @@ module.exports = async function (deployer, network, accounts) {
       "Usdt",
       "Usdt",
       18,
-      BigInt(999999999999999999999999999999999999999999)
+      eth.utils.toWei(1000000000000)
     );
     let stableCoin = await StableCoin.deployed();
     stableCoin.adminTransfer(
       accounts[0],
-      BigInt(100000000000000000000000000000000000)
+      eth.utils.toWei(100000)
     );
   }
 
