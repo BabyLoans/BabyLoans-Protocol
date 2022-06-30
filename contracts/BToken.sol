@@ -231,7 +231,7 @@ contract BToken is BTokenInterface {
      */
     function repayBorrow(uint repayAmount) override external returns (uint) {
         repayBorrowInternal(repayAmount);
-        return NO_ERROR;
+        return 0;
     }
 
     /**
@@ -242,7 +242,7 @@ contract BToken is BTokenInterface {
      */
     function repayBorrowBehalf(address borrower, uint repayAmount) override external returns (uint) {
         repayBorrowBehalfInternal(borrower, repayAmount);
-        return NO_ERROR;
+        return 0;
     }
 
 
@@ -473,24 +473,8 @@ contract BToken is BTokenInterface {
         /* If repayAmount == -1, repayAmount = accountBorrows */
         uint repayAmountFinal = repayAmount == type(uint).max ? accountBorrowsPrev : repayAmount;
 
-        /////////////////////////
-        // EFFECTS & INTERACTIONS
-        // (No safe failures beyond this point)
-
-        /*
-         * We call doTransferIn for the payer and the repayAmount
-         *  Note: The cToken must handle variations between ERC-20 and ETH underlying.
-         *  On success, the cToken holds an additional repayAmount of cash.
-         *  doTransferIn reverts if anything goes wrong, since we can't be sure if side effects occurred.
-         *   it returns the amount actually transferred, in case of a fee.
-         */
         uint actualRepayAmount = doTransferIn(payer, repayAmountFinal);
 
-        /*
-         * We calculate the new borrower and total borrow balances, failing on underflow:
-         *  accountBorrowsNew = accountBorrows - actualRepayAmount
-         *  totalBorrowsNew = totalBorrows - actualRepayAmount
-         */
         uint accountBorrowsNew = accountBorrowsPrev - actualRepayAmount;
         uint totalBorrowsNew = totalBorrows - actualRepayAmount;
 
