@@ -136,6 +136,7 @@ abstract contract BTokenInterface is BTokenStorage {
 
     function mint(uint mintAmount) virtual external returns (uint);
     function redeem(uint redeemTokens) virtual external returns (uint);
+    function redeemUnderlying(uint redeemAmount) virtual external returns (uint);
     function transfer(address dst, uint256 amount) virtual external returns (bool);
     function transferFrom(address src, address dst, uint256 amount) external virtual returns (bool);
     function approve(address spender, uint256 amount) external virtual returns (bool);

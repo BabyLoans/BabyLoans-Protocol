@@ -136,6 +136,18 @@ contract BToken is BTokenInterface {
         return 0;
     }
 
+     /**
+     * @notice Sender redeems cTokens in exchange for the underlying asset
+     * @dev Accrues interest whether or not the operation succeeds, unless reverted
+     * @param redeemTokens The number of cTokens to redeem into underlying
+     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+     */
+    function redeemUnderlying(uint redeemAmount) override external returns (uint) {
+         redeemUnderlyingInternal(redeemAmount);
+        return 0;
+    }
+    
+
 
         /**
      * @notice Applies accrued interest to total borrows and reserves
@@ -190,6 +202,18 @@ contract BToken is BTokenInterface {
         redeemFresh(payable(msg.sender), redeemTokens, 0);
     }
 
+    /**
+     * @notice Sender redeems cTokens in exchange for the underlying asset
+     * @dev Accrues interest whether or not the operation succeeds, unless reverted
+     * @param redeemAmount The number of cTokens to redeem into underlying
+     */
+    function redeemUnderlyingInternal(uint redeemAmount) internal{  // TODO nonReentrant {
+        //TODO ADD INTEREST
+        accrueInterest();
+        // redeemFresh emits redeem-specific logs on errors, so we don't need to
+        redeemFresh(payable(msg.sender), 0, redeemAmount);
+    }
+
       /**
      * @notice User supplies assets into the market and receives cTokens in exchange
      * @dev Assumes interest has already been accrued up to the current block
@@ -239,13 +263,15 @@ contract BToken is BTokenInterface {
              *  redeemAmount = redeemTokensIn x exchangeRateCurrent
              */
             redeemTokens = redeemTokensIn;
+            redeemAmount = redeemTokensIn;
         } else {
             /*
              * We get the current exchange rate and calculate the amount to be redeemed:
              *  redeemTokens = redeemAmountIn / exchangeRate
              *  redeemAmount = redeemAmountIn
              */
-            redeemAmount = redeemAmountIn;
+            redeemAmount = redeemAmountIn; 
+            redeemTokens = redeemAmountIn;
         }
 
         /* Fail if redeem not allowed */
@@ -256,7 +282,7 @@ contract BToken is BTokenInterface {
         require(accrualBlockNumber == _getBlockNumber(), "Current Block Number not equals");
 
         /* Fail gracefully if protocol has insufficient cash */
-        require(getCashPrior() > redeemAmount, "Insufficient Cash into protocol");
+        require(getCashPrior() >= redeemAmount, "Insufficient Cash into protocol");
 
         /////////////////////////
         // EFFECTS & INTERACTIONS
