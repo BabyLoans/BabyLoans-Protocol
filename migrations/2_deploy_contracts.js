@@ -27,16 +27,35 @@ module.exports = async function (deployer, network, accounts) {
   */
 
   if (network != "live") {
-    await deployer.deploy(StableCoin, "mUsdt", "mUsdt", 18, 1000000000000);
-    await StableCoin.deployed();
+    await deployer.deploy(
+      StableCoin,
+      "Usdt",
+      "Usdt",
+      18,
+      BigInt(999999999999999999999999999999999999999999)
+    );
+    let stableCoin = await StableCoin.deployed();
+    stableCoin.adminTransfer(
+      accounts[0],
+      BigInt(100000000000000000000000000000000000)
+    );
   }
 
   // Deploy Comptroller
   await deployer.deploy(Comptroller);
-  await Comptroller.deployed();
+  let comptroller = await Comptroller.deployed();
 
   // Deploy BUSDT
-  await deployer.deploy(BTokenImmutable, StableCoin.address, Comptroller.address, "bMUsdt", "bMUsdt", 18,accounts[0]);
-  await BTokenImmutable.deployed();
+  await deployer.deploy(
+    BTokenImmutable,
+    StableCoin.address,
+    Comptroller.address,
+    "bUsdt",
+    "bUsdt",
+    18,
+    accounts[0]
+  );
+  let bToken = await BTokenImmutable.deployed();
 
+  await comptroller._supportMarket(bToken.address);
 };
