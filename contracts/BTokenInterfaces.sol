@@ -76,8 +76,18 @@ abstract contract BTokenStorage {
      */
     mapping(address => mapping(address => uint256)) internal transferAllowances;
 
+     /**
+     * @notice Container for borrow balance information
+     * @member principal Total balance (with accrued interest), after applying the most recent balance-changing action
+     * @member interestIndex Global borrowIndex as of the most recent balance-changing action
+     */
+    struct BorrowSnapshot {
+        uint principal;
+        uint interestIndex;
+    }
+
     // Mapping of account addresses to outstanding borrow balances
-    mapping(address => uint) internal accountBorrows;
+    mapping(address => BorrowSnapshot) internal accountBorrows;
 
 
 }
@@ -137,6 +147,7 @@ abstract contract BTokenInterface is BTokenStorage {
     function mint(uint mintAmount) virtual external returns (uint);
     function redeem(uint redeemTokens) virtual external returns (uint);
     function redeemUnderlying(uint redeemAmount) virtual external returns (uint);
+    function borrow(uint borrowAmount) virtual external returns (uint);
     function transfer(address dst, uint256 amount) virtual external returns (bool);
     function transferFrom(address src, address dst, uint256 amount) external virtual returns (bool);
     function approve(address spender, uint256 amount) external virtual returns (bool);

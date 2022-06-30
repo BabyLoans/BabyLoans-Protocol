@@ -214,6 +214,16 @@ contract BToken is BTokenInterface {
         redeemFresh(payable(msg.sender), 0, redeemAmount);
     }
 
+    /**
+     * @notice Sender borrows assets from the protocol to their own address
+     * @param borrowAmount The amount of the underlying asset to borrow
+     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+     */
+    function borrow(uint borrowAmount) override external returns (uint) {
+        borrowInternal(borrowAmount);
+        return 0;
+    }
+
       /**
      * @notice User supplies assets into the market and receives cTokens in exchange
      * @dev Assumes interest has already been accrued up to the current block
@@ -311,6 +321,95 @@ contract BToken is BTokenInterface {
         /* We call the defense hook */
         comptroller.redeemVerify(address(this), redeemer, redeemAmount, redeemTokens);
     }
+
+
+     /**
+      * @notice Sender borrows assets from the protocol to their own address
+      * @param borrowAmount The amount of the underlying asset to borrow
+      */
+    function borrowInternal(uint borrowAmount) internal { // TODO nonReentrant {
+        accrueInterest();
+        // borrowFresh emits borrow-specific logs on errors, so we don't need to
+        borrowFresh(payable(msg.sender), borrowAmount);
+    }
+
+     /**
+      * @notice Users borrow assets from the protocol to their own address
+      * @param borrowAmount The amount of the underlying asset to borrow
+      */
+    function borrowFresh(address payable borrower, uint borrowAmount) internal {
+        /* Fail if borrow not allowed */
+        uint allowed = comptroller.borrowAllowed(address(this), borrower, borrowAmount);
+        require(allowed == 0, "Redeem Not Allowed");
+    
+        /* Verify market's block number equals current block number */
+        require(accrualBlockNumber == _getBlockNumber(), "Current Block Number not equals");
+
+        /* Fail gracefully if protocol has insufficient cash */
+        require(getCashPrior() > borrowAmount, "Insufficient Cash into protocol");
+
+
+
+        /*
+         * We calculate the new borrower and total borrow balances, failing on overflow:
+         *  accountBorrowNew = accountBorrow + borrowAmount
+         *  totalBorrowsNew = totalBorrows + borrowAmount
+         */
+        uint accountBorrowsPrev = borrowBalanceStoredInternal(borrower);
+        uint accountBorrowsNew = accountBorrowsPrev + borrowAmount;
+        uint totalBorrowsNew = totalBorrows + borrowAmount;
+
+        /////////////////////////
+        // EFFECTS & INTERACTIONS
+        // (No safe failures beyond this point)
+
+        /*
+         * We write the previously calculated values into storage.
+         *  Note: Avoid token reentrancy attacks by writing increased borrow before external transfer.
+        `*/
+        accountBorrows[borrower].principal = accountBorrowsNew;
+        accountBorrows[borrower].interestIndex = borrowIndex;
+        totalBorrows = totalBorrowsNew;
+
+        /*
+         * We invoke doTransferOut for the borrower and the borrowAmount.
+         *  Note: The cToken must handle variations between ERC-20 and ETH underlying.
+         *  On success, the cToken borrowAmount less of cash.
+         *  doTransferOut reverts if anything goes wrong, since we can't be sure if side effects occurred.
+         */
+        doTransferOut(borrower, borrowAmount);
+
+        /* We emit a Borrow event */
+        emit Borrow(borrower, borrowAmount, accountBorrowsNew, totalBorrowsNew);
+    }
+
+
+    /**
+     * @notice Return the borrow balance of account based on stored data
+     * @param account The address whose balance should be calculated
+     * @return (error code, the calculated balance or 0 if error code is non-zero)
+     */
+    function borrowBalanceStoredInternal(address account) internal view returns (uint) {
+        /* Get borrowBalance and borrowIndex */
+        BorrowSnapshot storage borrowSnapshot = accountBorrows[account];
+
+        /* If borrowBalance = 0 then borrowIndex is likely also 0.
+         * Rather than failing the calculation with a division by 0, we immediately return 0 in this case.
+         */
+        if (borrowSnapshot.principal == 0) {
+            return 0;
+        }
+
+        /* Calculate new borrow balance using the interest index:
+         *  recentBorrowBalance = borrower.borrowBalance * market.borrowIndex / borrower.borrowIndex
+         */
+        uint principalTimesIndex = borrowSnapshot.principal * borrowIndex;
+        return principalTimesIndex / borrowSnapshot.interestIndex;
+    }
+
+
+
+
 
     /*** Safe Token ***/
 
@@ -415,7 +514,7 @@ contract BToken is BTokenInterface {
         return (
             0,
             accountTokens[account],
-            accountBorrows[account],
+            borrowBalanceStoredInternal(account),
             //TODO FOR RATE INTEREST
             0
         );

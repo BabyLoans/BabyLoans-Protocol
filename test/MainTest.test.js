@@ -1,4 +1,5 @@
 const { assert } = require("chai");
+const truffleAssert = require('truffle-assertions');
 
 const BTokenImmutable = artifacts.require("BTokenImmutable");
 const StableCoin = artifacts.require("StableCoin"); // A mock of USDT
@@ -156,4 +157,64 @@ contract("Redeem Asset", (accounts) => {
   });
 });
 
+  contract("Borrow Asset", (accounts) => {
+
+    let comptroller, stableCoin, bToken;
+  
+    before(async () => {
+      //contract load
+      comptroller = await Comptroller.new();
+      //create a stable Coin
+      stableCoin = await StableCoin.new("Mock USDT", "mUsdt", 18, 1000000000);
+      //transfer some Liquidity to admin
+      await stableCoin.adminTransfer(accounts[0], 100000);
+      //Create BToken
+      bToken = await BTokenImmutable.new(
+        stableCoin.address,
+        comptroller.address,
+        "bMUsdt",
+        "bMUsdt",
+        18,
+        accounts[0]
+      );
+      //Add BToken to Market Comptroller
+      await comptroller._supportMarket(bToken.address);
+      //approve transaction
+      await stableCoin.approve(bToken.address, 10);
+      
+      //mint 10
+      await bToken.mint(10);
+    });
+  
+    // Test redeem
+    describe("Borrow Btoken for Stable", async () => {
+      it("If you have minted you can borrow ", async () => {
+        assert.equal(true, await bToken.isBToken());
+        await bToken.borrow(5);
+  
+        //load your amount of stable
+        let accountBalanceOfStable = (await stableCoin.balanceOf(accounts[0])).toNumber();
+        //load your amount of Btoken
+        let accountBalanceOfBToken = (await bToken.balanceOf(accounts[0])).toNumber();
+  
+        console.log("Stable in account[0]:",accountBalanceOfStable)
+        console.log("BToken in account[0]:",accountBalanceOfBToken)
+
+        assert.equal(99995, accountBalanceOfStable);
+        assert.equal(10, accountBalanceOfBToken);
+
+        // TODO TEST LA VAR currentBorrow
+      });
+
+      it("Revert if borrow without enough Collateral", async () => {
+        assert.equal(true, await bToken.isBToken());
+        //borrow 10
+        await truffleAssert.reverts(
+          bToken.borrow(1),
+          "revert",
+          "Error: contract does not revert transaction"
+        );
+      });
+    });
+  });
 
