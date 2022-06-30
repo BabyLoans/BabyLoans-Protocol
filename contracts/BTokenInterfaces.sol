@@ -130,6 +130,11 @@ abstract contract BTokenInterface is BTokenStorage {
     event Borrow(address borrower, uint256 borrowAmount, uint256 accountBorrows, uint256 totalBorrows);
 
     /**
+     * @notice Event emitted when a borrow is repaid
+     */
+    event RepayBorrow(address payer, address borrower, uint repayAmount, uint accountBorrows, uint totalBorrows);
+
+    /**
      * @notice EIP20 Transfer event
      */
     event Transfer(address indexed from, address indexed to, uint256 amount);
@@ -148,6 +153,8 @@ abstract contract BTokenInterface is BTokenStorage {
     function redeem(uint redeemTokens) virtual external returns (uint);
     function redeemUnderlying(uint redeemAmount) virtual external returns (uint);
     function borrow(uint borrowAmount) virtual external returns (uint);
+    function repayBorrow(uint repayAmount) virtual external returns (uint);
+    function repayBorrowBehalf(address borrower, uint repayAmount) virtual external returns (uint);
     function transfer(address dst, uint256 amount) virtual external returns (bool);
     function transferFrom(address src, address dst, uint256 amount) external virtual returns (bool);
     function approve(address spender, uint256 amount) external virtual returns (bool);

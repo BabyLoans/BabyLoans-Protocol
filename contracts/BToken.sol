@@ -224,6 +224,28 @@ contract BToken is BTokenInterface {
         return 0;
     }
 
+    /**
+     * @notice Sender repays their own borrow
+     * @param repayAmount The amount to repay, or -1 for the full outstanding amount
+     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+     */
+    function repayBorrow(uint repayAmount) override external returns (uint) {
+        repayBorrowInternal(repayAmount);
+        return NO_ERROR;
+    }
+
+    /**
+     * @notice Sender repays a borrow belonging to borrower
+     * @param borrower the account with the debt being payed off
+     * @param repayAmount The amount to repay, or -1 for the full outstanding amount
+     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+     */
+    function repayBorrowBehalf(address borrower, uint repayAmount) override external returns (uint) {
+        repayBorrowBehalfInternal(borrower, repayAmount);
+        return NO_ERROR;
+    }
+
+
       /**
      * @notice User supplies assets into the market and receives cTokens in exchange
      * @dev Assumes interest has already been accrued up to the current block
@@ -406,6 +428,83 @@ contract BToken is BTokenInterface {
         uint principalTimesIndex = borrowSnapshot.principal * borrowIndex;
         return principalTimesIndex / borrowSnapshot.interestIndex;
     }
+
+
+    /**
+     * @notice Sender repays their own borrow
+     * @param repayAmount The amount to repay, or -1 for the full outstanding amount
+     */
+    function repayBorrowInternal(uint repayAmount) internal { // TODO nonReentrant {
+        accrueInterest();
+        // repayBorrowFresh emits repay-borrow-specific logs on errors, so we don't need to
+        repayBorrowFresh(msg.sender, msg.sender, repayAmount);
+    }
+
+    /**
+     * @notice Sender repays a borrow belonging to borrower
+     * @param borrower the account with the debt being payed off
+     * @param repayAmount The amount to repay, or -1 for the full outstanding amount
+     */
+    function repayBorrowBehalfInternal(address borrower, uint repayAmount) internal { // TODO nonReentrant {
+        accrueInterest();
+        // repayBorrowFresh emits repay-borrow-specific logs on errors, so we don't need to
+        repayBorrowFresh(msg.sender, borrower, repayAmount);
+    }
+
+      /**
+     * @notice Borrows are repaid by another user (possibly the borrower).
+     * @param payer the account paying off the borrow
+     * @param borrower the account with the debt being payed off
+     * @param repayAmount the amount of underlying tokens being returned, or -1 for the full outstanding amount
+     * @return (uint) the actual repayment amount.
+     */
+    function repayBorrowFresh(address payer, address borrower, uint repayAmount) internal returns (uint) {
+        /* Fail if repayBorrow not allowed */
+        uint allowed = comptroller.repayBorrowAllowed(address(this), payer, borrower, repayAmount);
+        require(allowed == 0, "Redeem Not Allowed");
+    
+        /* Verify market's block number equals current block number */
+        require(accrualBlockNumber == _getBlockNumber(), "Current Block Number not equals");
+
+
+        /* We fetch the amount the borrower owes, with accumulated interest */
+        uint accountBorrowsPrev = borrowBalanceStoredInternal(borrower);
+
+        /* If repayAmount == -1, repayAmount = accountBorrows */
+        uint repayAmountFinal = repayAmount == type(uint).max ? accountBorrowsPrev : repayAmount;
+
+        /////////////////////////
+        // EFFECTS & INTERACTIONS
+        // (No safe failures beyond this point)
+
+        /*
+         * We call doTransferIn for the payer and the repayAmount
+         *  Note: The cToken must handle variations between ERC-20 and ETH underlying.
+         *  On success, the cToken holds an additional repayAmount of cash.
+         *  doTransferIn reverts if anything goes wrong, since we can't be sure if side effects occurred.
+         *   it returns the amount actually transferred, in case of a fee.
+         */
+        uint actualRepayAmount = doTransferIn(payer, repayAmountFinal);
+
+        /*
+         * We calculate the new borrower and total borrow balances, failing on underflow:
+         *  accountBorrowsNew = accountBorrows - actualRepayAmount
+         *  totalBorrowsNew = totalBorrows - actualRepayAmount
+         */
+        uint accountBorrowsNew = accountBorrowsPrev - actualRepayAmount;
+        uint totalBorrowsNew = totalBorrows - actualRepayAmount;
+
+        /* We write the previously calculated values into storage */
+        accountBorrows[borrower].principal = accountBorrowsNew;
+        accountBorrows[borrower].interestIndex = borrowIndex;
+        totalBorrows = totalBorrowsNew;
+
+        /* We emit a RepayBorrow event */
+        emit RepayBorrow(payer, borrower, actualRepayAmount, accountBorrowsNew, totalBorrowsNew);
+
+        return actualRepayAmount;
+    }
+
 
 
 
