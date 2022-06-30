@@ -30,6 +30,9 @@ contract BToken is BTokenInterface {
         name = name_;
         symbol = symbol_;
         decimals = decimal_;
+
+        // The counter starts true to prevent changing it from zero to non-zero (i.e. smaller cost/refund)
+        _notEntered = true;
         
         // Set underlying and sanity check it
         underlying = underlyingContract_;

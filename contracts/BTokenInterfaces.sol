@@ -6,6 +6,11 @@ import "./ComptrollerInterface.sol";
 
 abstract contract BTokenStorage {
 
+     /**
+     * @dev Guard variable for re-entrancy checks
+     */
+    bool internal _notEntered;
+
     /**
      * @notice Administrator for this contract
      */
