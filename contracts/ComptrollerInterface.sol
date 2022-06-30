@@ -116,6 +116,9 @@ abstract contract ComptrollerInterface is ComptrollerStorage {
         uint256 transferTokens
     ) external virtual returns (uint256);
 
+
+    function getAllMarkets() external virtual returns (BToken[] memory);
+
     /*** Liquidity/Liquidation Calculations ***/
 
     //     function liquidateCalculateSeizeTokens(

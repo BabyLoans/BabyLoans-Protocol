@@ -428,7 +428,7 @@ contract Comptroller is ComptrollerInterface {
         return uint256(Error.NO_ERROR);
     }
 
-    function getAllMarkets() public view returns (BToken[] memory) {
+    function getAllMarkets() override public view returns (BToken[] memory) {
         return allMarkets;
     }
 

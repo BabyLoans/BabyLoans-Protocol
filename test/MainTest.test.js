@@ -135,8 +135,9 @@ contract("Redeem Asset", (accounts) => {
       assert.equal(true, await bToken.isBToken());
       //approve transaction
       await stableCoin.approve(bToken.address, 10);
-      //mint 10
-      await bToken.redeem(10);
+      //redeem 10
+      await bToken.redeem(5);
+      await bToken.redeemUnderlying(5);
 
       //load your amount of stable
       let accountBalanceOfStable = (
