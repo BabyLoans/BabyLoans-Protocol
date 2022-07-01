@@ -3,59 +3,64 @@ const BTokenImmutable = artifacts.require("BTokenImmutable");
 const Comptroller = artifacts.require("Comptroller");
 
 module.exports = async function (deployer, network, accounts) {
-  /*
-  let tokens = [
-    {
-      name: "bDai",
-      symbol: "bDai",
-      decimals: 18,
-      underlyingContract: "0x1af3f329e8be154074d8769d1ffa4ee058b1dbc3",
-    },
-    {
-      name: "bUsdt",
-      symbol: "bUsdt",
-      decimals: 18,
-      underlyingContract: "0x55d398326f99059ff775485246999027b3197955",
-    },
-    {
-      name: "bUsdc",
-      symbol: "bUsdc",
-      decimals: 18,
-      underlyingContract: "0xba5fe23f8a3a24bed3236f05f2fcf35fd0bf0b5c",
-    },
-  ];
-  */
+  let usdt = await StableCoin.new(
+    "USDT",
+    "USDT",
+    18,
+    web3.utils.toWei("1000000000000")
+  );
+  usdt.adminTransfer(accounts[0], web3.utils.toWei("10000"));
 
-  if (network != "live") {
-    await deployer.deploy(
-      StableCoin,
-      "Usdt",
-      "Usdt",
-      18,
-      web3.utils.toWei("1000000000000")
-    );
-    let stableCoin = await StableCoin.deployed();
-    stableCoin.adminTransfer(
-      accounts[0],
-      web3.utils.toWei("10000")
-    );
-  }
+  let usdc = await StableCoin.new(
+    "USDC",
+    "USDC",
+    18,
+    web3.utils.toWei("1000000000000")
+  );
+  usdc.adminTransfer(accounts[0], web3.utils.toWei("10000"));
+
+  let dai = await StableCoin.new(
+    "DAI",
+    "DAI",
+    18,
+    web3.utils.toWei("1000000000000")
+  );
+  dai.adminTransfer(accounts[0], web3.utils.toWei("10000"));
 
   // Deploy Comptroller
   await deployer.deploy(Comptroller);
   let comptroller = await Comptroller.deployed();
 
   // Deploy BUSDT
-  await deployer.deploy(
-    BTokenImmutable,
-    StableCoin.address,
+  let bUSDT = await BTokenImmutable.new(
+    usdt.address,
     Comptroller.address,
-    "bUsdt",
-    "bUsdt",
+    "bUSDT",
+    "bUSDT",
     18,
     accounts[0]
   );
-  let bToken = await BTokenImmutable.deployed();
+  await comptroller._supportMarket(bUSDT.address);
 
-  await comptroller._supportMarket(bToken.address);
+  // Deploy BUSDC
+  let bUSDC = await BTokenImmutable.new(
+    usdc.address,
+    Comptroller.address,
+    "bUSDC",
+    "bUSDC",
+    18,
+    accounts[0]
+  );
+  await comptroller._supportMarket(bUSDC.address);
+
+  // Deploy BDAI
+  let bDAI = await BTokenImmutable.new(
+    dai.address,
+    Comptroller.address,
+    "bDAI",
+    "bDAI",
+    18,
+    accounts[0]
+  );
+  await comptroller._supportMarket(bDAI.address);
 };
