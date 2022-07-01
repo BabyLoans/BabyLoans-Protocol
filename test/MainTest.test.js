@@ -191,6 +191,8 @@ contract("Redeem Asset", (accounts) => {
       it("If you have minted you can borrow ", async () => {
         assert.equal(true, await bToken.isBToken());
         await bToken.borrow(web3.utils.toWei("9000"));
+
+        console.log(await bToken.getAccountInfo(accounts[0]));
   
         //load your amount of stable
         let accountBalanceOfStable = (await stableCoin.balanceOf(accounts[0])).toString();

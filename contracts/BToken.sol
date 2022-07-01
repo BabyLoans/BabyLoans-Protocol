@@ -417,6 +417,7 @@ contract BToken is BTokenInterface {
     function borrowBalanceStoredInternal(address account) internal view returns (uint) {
         /* Get borrowBalance and borrowIndex */
         BorrowSnapshot storage borrowSnapshot = accountBorrows[account];
+        return borrowSnapshot.principal;
 
         /* If borrowBalance = 0 then borrowIndex is likely also 0.
          * Rather than failing the calculation with a division by 0, we immediately return 0 in this case.
